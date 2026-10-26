@@ -4,6 +4,10 @@ Plataforma colaborativa de publicación de artículos, al estilo de una revista 
 
 Proyecto académico construido con Django, plantillas del servidor, CSS propio y JavaScript vanilla. Sin frameworks de frontend ni dependencias externas.
 
+## Demo pública
+
+Demo pública: [pendiente de URL]
+
 ## Características
 
 - **Registro, login y logout** (el logout funciona por POST). El email no puede repetirse y, tras registrarse, el usuario inicia sesión automáticamente.
@@ -25,7 +29,8 @@ Proyecto académico construido con Django, plantillas del servidor, CSS propio y
 
 - Python 3.14
 - Django 6.1
-- SQLite (desarrollo)
+- SQLite (desarrollo) y PostgreSQL (producción)
+- Gunicorn y WhiteNoise (producción en Render)
 - Django Templates, HTML y CSS propio
 - JavaScript vanilla (`main.js`, `likes.js`)
 
@@ -172,6 +177,64 @@ python manage.py test
 
 Cubren autenticación, CRUD y propiedad de los artículos, slugs y colisiones, el flujo editorial completo, la visibilidad pública, comentarios, likes (incluido CSRF), búsqueda, filtros, paginación, permisos y la idempotencia de `seed_demo`.
 
+## Despliegue
+
+ArticleHub está preparado para desplegarse en [Render](https://render.com) mediante un Blueprint (`render.yaml`):
+
+- **Local**: SQLite (`db.sqlite3`), `DEBUG = True` y una `SECRET_KEY` de desarrollo. No hace falta ninguna variable de entorno.
+- **Producción**: PostgreSQL de Render a través de `DATABASE_URL` (con `dj-database-url`), `DEBUG = False` y `SECRET_KEY` desde el entorno.
+- **Gunicorn** sirve la aplicación WSGI (`config.wsgi:application`). Lee `PORT` y `WEB_CONCURRENCY` del entorno.
+- **WhiteNoise** sirve los estáticos de `static/`, recopilados en `staticfiles/` con nombres con hash y compresión (`CompressedManifestStaticFilesStorage`).
+- **`build.sh`** instala dependencias, ejecuta `collectstatic` y `migrate`, y crea el superusuario si se han definido sus variables. Si ya existe, no hace nada.
+- **`render.yaml`** define la base de datos `articlehub-db` y el Web Service `articlehub`, ambos en el plan Free.
+- **`.python-version`** fija Python 3.14 (Render usa el último parche de esa versión).
+
+| Comando | Valor |
+|---------|-------|
+| Build   | `./build.sh` |
+| Start   | `python -m gunicorn config.wsgi:application` |
+
+### Variables de entorno
+
+| Variable | Origen | Uso |
+|----------|--------|-----|
+| `DATABASE_URL` | `articlehub-db` | Conexión a PostgreSQL. Si no existe, se usa SQLite. |
+| `SECRET_KEY` | Generada por Render | Obligatoria cuando `RENDER=true`. |
+| `DEBUG` | `False` | Por defecto `True` en local y `False` en Render. |
+| `WEB_CONCURRENCY` | `2` | Workers de Gunicorn (adecuado para los 512 MB del plan Free). |
+| `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` | Las pide Render al crear el Blueprint | Superusuario inicial (opcional). |
+| `RENDER`, `RENDER_EXTERNAL_HOSTNAME` | Las define Render automáticamente | Activan HTTPS (`SECURE_PROXY_SSL_HEADER`, cookies seguras, redirección) y añaden el dominio a `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS`. |
+
+Ningún secreto está en el repositorio.
+
+### Crear el Blueprint en Render
+
+1. En el dashboard de Render: **New** > **Blueprint**.
+2. Conecta el repositorio `TsCesar/django-article-platform` (rama `main`).
+3. Render lee `render.yaml` y muestra la base de datos y el Web Service.
+4. Introduce `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD`.
+5. Pulsa **Deploy Blueprint** y espera a que termine el build.
+6. Abre `https://<servicio>.onrender.com/` y entra en `/admin/` con el superusuario.
+
+### Editores en producción
+
+El grupo `Editors` y su permiso `articles.review_article` se crean automáticamente con `migrate` (señal `post_migrate`), así que existen tras el primer build. Para convertir un usuario en editor, entra en `/admin/` con el superusuario, abre **Usuarios**, elige el usuario, añade `Editors` en **Grupos** y guarda. El plan Free de Render no ofrece shell, por eso se hace desde el admin.
+
+### Datos demo en producción
+
+`seed_demo` **no** se ejecuta en el build, para que cada deploy no altere los datos de la demo. Si se quiere cargar la demo una vez, hay dos opciones:
+
+- En un plan de pago con shell: `python manage.py seed_demo`.
+- Desde tu equipo, apuntando a la base de datos de Render con su *External Database URL*: `DATABASE_URL="<External Database URL>" python manage.py seed_demo`.
+
+Los usuarios demo usan contraseñas públicas (ver *Datos demo*). En una demo pública, conviene cambiarlas desde el admin o no cargarlos.
+
+### Limitaciones del plan Free
+
+- El Web Service se suspende tras 15 minutos sin tráfico; la primera visita después tarda en responder.
+- La base de datos Free expira a los 30 días de crearse (con 14 días de margen para pasar a un plan de pago).
+- Sin shell ni SSH en el Web Service.
+
 ## Capturas
 
 > Pendiente de añadir capturas de la portada, el detalle de un artículo, el dashboard y el panel editorial.
@@ -182,4 +245,5 @@ Cubren autenticación, CRUD y propiedad de los artículos, slugs y colisiones, e
 - Los artículos publicados no se pueden editar ni retirar desde la interfaz. Se gestionan desde el admin.
 - Las etiquetas y categorías se crean desde el admin.
 - La búsqueda usa `icontains` (sin búsqueda de texto completo ni ranking).
-- La configuración es solo de desarrollo (`DEBUG = True`, SQLite y `SECRET_KEY` de desarrollo).
+- La app no envía emails. `MAILERS` usa el backend de consola, por lo que `check --deploy` muestra `mail.E001`; no afecta al despliegue.
+- HSTS (`SECURE_HSTS_SECONDS`) no está activado.
