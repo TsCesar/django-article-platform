@@ -1,0 +1,12 @@
+{% if page_obj and page_obj.object_list %}
+  <div class="article-grid">
+    {% for article in page_obj %}
+      {% include "includes/article_card.html" %}
+    {% endfor %}
+  </div>
+  {% include "includes/pagination.html" %}
+{% else %}
+  <div class="empty-state">
+    <p>{{ empty_message|default:"Todavía no hay artículos publicados aquí." }}</p>
+  </div>
+{% endif %}

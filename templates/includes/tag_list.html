@@ -1,0 +1,7 @@
+{% with tags=article.tags.all %}
+  {% if tags %}
+    <ul class="tag-list">
+      {% for tag in tags %}<li><a class="tag" href="{{ tag.get_absolute_url }}">#{{ tag.name }}</a></li>{% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}

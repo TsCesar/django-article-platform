@@ -1,0 +1,17 @@
+<header class="article-header">
+  {% if article.category %}
+    <a class="eyebrow" href="{{ article.category.get_absolute_url }}">{{ article.category.name }}</a>
+  {% endif %}
+  <h1 class="article-title">{{ article.title }}</h1>
+  {% if article.excerpt %}<p class="article-lead">{{ article.excerpt }}</p>{% endif %}
+  <div class="article-meta">
+    {% include "includes/author_chip.html" with author=article.author %}
+    <span class="dot" aria-hidden="true">·</span>
+    {% if article.published_at %}
+      <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"j \d\e F \d\e Y" }}</time>
+    {% else %}
+      <span>Actualizado el {{ article.updated_at|date:"j M Y, H:i" }}</span>
+    {% endif %}
+  </div>
+  {% include "includes/tag_list.html" %}
+</header>

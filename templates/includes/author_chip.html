@@ -1,0 +1,4 @@
+<a class="author-chip" href="{% url 'articles:author_detail' author.username %}">
+  <span class="avatar" aria-hidden="true">{{ author.username|first|upper }}</span>
+  <span>{{ author.username }}</span>
+</a>

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Acceso denegado{% endblock %}
+{% block content %}
+<section class="error-page">
+  <p class="error-code">403</p>
+  <h1>Acceso denegado</h1>
+  <p class="muted">{% if exception %}{{ exception }}{% else %}No tienes permisos para ver esta página.{% endif %}</p>
+  <a class="btn btn-primary" href="{% url 'articles:home' %}">Volver al inicio</a>
+</section>
+{% endblock %}

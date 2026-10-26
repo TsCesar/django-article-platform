@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="page-header page-header-row">
+  <div>
+    <p class="eyebrow">Dashboard</p>
+    <h1>Mis artículos</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'articles:article_create' %}">+ Nuevo artículo</a>
+</section>
+
+<div class="stat-grid">
+  <div class="stat card"><span class="stat-value">{{ counts.total }}</span><span class="stat-label">Total</span></div>
+  <div class="stat card stat-draft"><span class="stat-value">{{ counts.drafts }}</span><span class="stat-label">Borradores</span></div>
+  <div class="stat card stat-pending_review"><span class="stat-value">{{ counts.pending }}</span><span class="stat-label">Pendientes</span></div>
+  <div class="stat card stat-published"><span class="stat-value">{{ counts.published }}</span><span class="stat-label">Publicados</span></div>
+  <div class="stat card stat-rejected"><span class="stat-value">{{ counts.rejected }}</span><span class="stat-label">Rechazados</span></div>
+</div>
+
+{% if articles %}
+  <div class="table-wrap card">
+    <table class="data-table">
+      <thead>
+        <tr><th>Título</th><th>Categoría</th><th>Estado</th><th>Actualizado</th><th class="actions-col">Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for article in articles %}
+          <tr>
+            <td data-label="Título"><a href="{{ article.get_private_url }}">{{ article.title }}</a></td>
+            <td data-label="Categoría">{{ article.category.name|default:"—" }}</td>
+            <td data-label="Estado">{% include "includes/status_badge.html" %}</td>
+            <td data-label="Actualizado">{{ article.updated_at|date:"j M Y, H:i" }}</td>
+            <td data-label="Acciones" class="actions-col">
+              <div class="table-actions">
+                {% if article.is_published %}
+                  <a href="{{ article.get_absolute_url }}">Ver</a>
+                {% else %}
+                  <a href="{{ article.get_private_url }}">{% if article.status == "REJECTED" %}Ver motivo{% else %}Ver{% endif %}</a>
+                {% endif %}
+                {% if article.is_editable %}
+                  <a href="{% url 'articles:article_update' article.slug %}">Editar</a>
+                  <form method="post" action="{% url 'articles:article_submit' article.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" class="link-button">{% if article.status == "REJECTED" %}Reenviar{% else %}Enviar a revisión{% endif %}</button>
+                  </form>
+                  <a class="link-danger" href="{% url 'articles:article_delete' article.slug %}">Eliminar</a>
+                {% elif article.status == "PENDING_REVIEW" %}
+                  <span class="muted">Esperando revisión</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <p>Todavía no has escrito ningún artículo.</p>
+    <a class="btn btn-primary" href="{% url 'articles:article_create' %}">Escribir mi primer artículo</a>
+  </div>
+{% endif %}
+{% endblock %}

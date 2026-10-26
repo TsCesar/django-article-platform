@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta{% endblock %}
+{% block content %}
+<section class="auth-card card">
+  <h1>Crear cuenta</h1>
+  <p class="muted">Únete a ArticleHub y publica tus artículos tras la revisión editorial.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
+    <button type="submit" class="btn btn-primary btn-block">Registrarme</button>
+  </form>
+  <p class="auth-switch">¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}">Inicia sesión</a></p>
+</section>
+{% endblock %}

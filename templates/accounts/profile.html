@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Mi cuenta</p>
+  <h1>{{ user.username }}</h1>
+  <p class="muted">{{ user.email|default:"Sin email" }} · Miembro desde {{ user.date_joined|date:"F Y" }}</p>
+  <div class="role-list">
+    <span class="badge badge-neutral">Autor</span>
+    {% if user_is_editor %}<span class="badge badge-published">Editor</span>{% endif %}
+    {% if user.is_staff %}<span class="badge badge-pending_review">Staff</span>{% endif %}
+  </div>
+</section>
+
+<div class="stat-grid">
+  <div class="stat card"><span class="stat-value">{{ stats.total }}</span><span class="stat-label">Artículos escritos</span></div>
+  <div class="stat card"><span class="stat-value">{{ stats.published }}</span><span class="stat-label">Publicados</span></div>
+  <div class="stat card"><span class="stat-value">{{ comment_count }}</span><span class="stat-label">Comentarios</span></div>
+  <div class="stat card"><span class="stat-value">{{ like_count }}</span><span class="stat-label">Me gusta dados</span></div>
+</div>
+
+<div class="button-row">
+  <a class="btn btn-primary" href="{% url 'articles:dashboard' %}">Ir a mis artículos</a>
+  <a class="btn btn-ghost" href="{% url 'articles:author_detail' user.username %}">Ver mi página pública</a>
+  {% if user.is_staff %}<a class="btn btn-ghost" href="{% url 'admin:index' %}">Administración</a>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Buscar{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Buscar</p>
+  <h1>{% if query %}Resultados para “{{ query }}”{% else %}Buscar artículos{% endif %}</h1>
+  <form class="search-form" action="{% url 'articles:search' %}" method="get" role="search">
+    <input type="search" name="q" value="{{ query }}" placeholder="Título, contenido, autor, categoría o etiqueta" aria-label="Buscar artículos" autofocus>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+  {% if page_obj %}<p class="muted">{{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}</p>{% endif %}
+</section>
+
+{% if query %}
+  {% include "includes/article_list.html" with empty_message="No hemos encontrado artículos publicados con esa búsqueda." %}
+{% else %}
+  <div class="empty-state"><p>Escribe un término para buscar entre los artículos publicados.</p></div>
+{% endif %}
+{% endblock %}

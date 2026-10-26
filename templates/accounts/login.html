@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+{% block content %}
+<section class="auth-card card">
+  <h1>Iniciar sesión</h1>
+  <p class="muted">Accede para escribir, comentar y seguir el estado de tus artículos.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+  </form>
+  <p class="auth-switch">¿No tienes cuenta? <a href="{% url 'accounts:register' %}">Regístrate</a></p>
+</section>
+{% endblock %}

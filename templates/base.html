@@ -1,0 +1,25 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Inicio{% endblock %} · ArticleHub</title>
+  <meta name="description" content="ArticleHub, revista digital colaborativa con revisión editorial.">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  {% include "includes/navbar.html" %}
+  {% include "includes/messages.html" %}
+  <main class="container page">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="brand brand-small">Article<span>Hub</span></span>
+      <span>Proyecto académico con Django · Publicación con revisión editorial</span>
+    </div>
+  </footer>
+  <script src="{% static 'js/main.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

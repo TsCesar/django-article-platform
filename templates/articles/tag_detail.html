@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}#{{ tag.name }}{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Etiqueta</p>
+  <h1>#{{ tag.name }}</h1>
+  <p class="muted">{{ page_obj.paginator.count }} artículo{{ page_obj.paginator.count|pluralize }} publicado{{ page_obj.paginator.count|pluralize }}</p>
+</section>
+{% include "includes/article_list.html" with empty_message="Aún no hay artículos publicados con esta etiqueta." %}
+{% endblock %}

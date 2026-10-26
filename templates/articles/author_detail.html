@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ author.username }}{% endblock %}
+{% block content %}
+<section class="page-header author-header">
+  <span class="avatar avatar-lg" aria-hidden="true">{{ author.username|first|upper }}</span>
+  <div>
+    <p class="eyebrow">Autor</p>
+    <h1>{{ author.username }}</h1>
+    <p class="muted">{{ published_count }} artículo{{ published_count|pluralize }} publicado{{ published_count|pluralize }} · Miembro desde {{ author.date_joined|date:"F Y" }}</p>
+  </div>
+</section>
+{% include "includes/article_list.html" with empty_message="Este autor todavía no tiene artículos publicados." %}
+{% endblock %}

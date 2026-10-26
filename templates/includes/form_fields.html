@@ -1,0 +1,27 @@
+{% if form.non_field_errors %}
+  <div class="form-errors">
+    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  </div>
+{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+{% for field in form.visible_fields %}
+  <div class="form-field{% if field.errors %} has-error{% endif %}">
+    {% if field.widget_type == 'checkboxselectmultiple' or field.widget_type == 'radioselect' %}
+      <fieldset>
+        <legend>{{ field.label }}</legend>
+        <div class="choice-list">
+          {% for choice in field %}
+            <label class="choice">{{ choice.tag }} <span>{{ choice.choice_label }}</span></label>
+          {% empty %}
+            <p class="muted">No hay opciones disponibles.</p>
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% else %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+    {% endif %}
+    {% if field.help_text %}<small class="help-text">{{ field.help_text|safe }}</small>{% endif %}
+    {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+  </div>
+{% endfor %}

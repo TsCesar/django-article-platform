@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Panel editorial{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Panel editorial</p>
+  <h1>Cola de revisión</h1>
+  <p class="muted">{{ pending|length }} artículo{{ pending|length|pluralize }} pendiente{{ pending|length|pluralize }}, ordenados por fecha de envío (los más antiguos primero).</p>
+</section>
+
+{% if pending %}
+  <div class="table-wrap card">
+    <table class="data-table">
+      <thead>
+        <tr><th>Título</th><th>Autor</th><th>Categoría</th><th>Enviado</th><th class="actions-col">Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for article in pending %}
+          <tr>
+            <td data-label="Título"><a href="{{ article.get_private_url }}">{{ article.title }}</a></td>
+            <td data-label="Autor">{{ article.author.username }}</td>
+            <td data-label="Categoría">{{ article.category.name|default:"—" }}</td>
+            <td data-label="Enviado">{{ article.submitted_at|date:"j M Y, H:i" }}</td>
+            <td data-label="Acciones" class="actions-col">
+              <div class="table-actions">
+                <a href="{{ article.get_private_url }}">Abrir</a>
+                {% if article.author == user %}
+                  <span class="muted">Es tuyo: lo revisa otro editor</span>
+                {% else %}
+                  <a href="{% url 'articles:editor_review' article.slug %}">Revisar</a>
+                  <form method="post" action="{% url 'articles:editor_review' article.slug %}" data-confirm="¿Aprobar y publicar “{{ article.title }}”?">
+                    {% csrf_token %}
+                    <input type="hidden" name="decision" value="APPROVED">
+                    <button type="submit" class="link-button link-success">Aprobar</button>
+                  </form>
+                  <a class="link-danger" href="{% url 'articles:editor_review' article.slug %}?decision=REJECTED#review-form">Rechazar</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state"><p>No hay artículos pendientes de revisión. ¡Buen trabajo!</p></div>
+{% endif %}
+
+{% if recent_reviews %}
+  <section class="review-history card">
+    <h2>Últimas decisiones</h2>
+    <ol class="review-list">
+      {% for review in recent_reviews %}
+        <li class="review">
+          <div class="review-head">
+            <span class="badge badge-{% if review.decision == 'APPROVED' %}published{% else %}rejected{% endif %}">{{ review.get_decision_display }}</span>
+            <a href="{{ review.article.get_private_url }}">{{ review.article.title }}</a>
+            <span class="muted">por {{ review.reviewer.username|default:"editor eliminado" }} · {{ review.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% endif %}
+{% endblock %}

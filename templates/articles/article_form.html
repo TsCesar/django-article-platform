@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if article %}Editar artículo{% else %}Nuevo artículo{% endif %}{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">{% if article %}Editar{% else %}Nuevo artículo{% endif %}</p>
+  <h1>{% if article %}{{ article.title }}{% else %}Escribe tu artículo{% endif %}</h1>
+  <p class="muted">Se guarda como borrador. Cuando esté listo, envíalo a revisión desde su ficha.</p>
+  {% if article.status == "REJECTED" %}
+    {% with last_review=article.reviews.first %}
+      {% if last_review %}
+        <div class="notice notice-rejected">
+          <strong>Motivo del último rechazo:</strong> {{ last_review.comment }}
+        </div>
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+</section>
+
+<form method="post" class="card article-form" novalidate>
+  {% csrf_token %}
+  {% include "includes/form_fields.html" %}
+  <div class="button-row">
+    <button type="submit" class="btn btn-primary">Guardar borrador</button>
+    <a class="btn btn-ghost" href="{% if article %}{{ article.get_private_url }}{% else %}{% url 'articles:dashboard' %}{% endif %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

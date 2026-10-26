@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Revista digital colaborativa</p>
+  <h1>Ideas revisadas, publicadas con criterio.</h1>
+  <p class="hero-lead">Artículos escritos por la comunidad y aprobados por nuestro equipo editorial.</p>
+  <form class="search-form" action="{% url 'articles:search' %}" method="get" role="search">
+    <input type="search" name="q" placeholder="Buscar por título, contenido, autor, categoría o etiqueta" aria-label="Buscar artículos">
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+</section>
+
+<div class="layout-with-sidebar">
+  <section>
+    <div class="section-head">
+      <h2>Últimos artículos</h2>
+      <form class="filter-form" method="get" action="{% url 'articles:home' %}">
+        <label class="visually-hidden" for="filter-author">Autor</label>
+        <select name="author" id="filter-author" data-autosubmit>
+          <option value="">Todos los autores</option>
+          {% for item in authors %}
+            <option value="{{ item.username }}" {% if filters.author == item.username %}selected{% endif %}>{{ item.username }}</option>
+          {% endfor %}
+        </select>
+        <label class="visually-hidden" for="filter-category">Categoría</label>
+        <select name="category" id="filter-category" data-autosubmit>
+          <option value="">Todas las categorías</option>
+          {% for category in categories %}
+            <option value="{{ category.slug }}" {% if filters.category.slug == category.slug %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        {% if filters.tag %}<input type="hidden" name="tag" value="{{ filters.tag.slug|default:filters.tag }}">{% endif %}
+        <noscript><button type="submit" class="btn btn-ghost btn-sm">Filtrar</button></noscript>
+      </form>
+    </div>
+
+    {% if filters %}
+      <div class="active-filters">
+        <span class="muted">Filtrando por:</span>
+        {% if filters.author %}<span class="chip">Autor: {{ filters.author }}</span>{% endif %}
+        {% if filters.category %}<span class="chip">Categoría: {{ filters.category }}</span>{% endif %}
+        {% if filters.tag %}<span class="chip">Etiqueta: #{{ filters.tag }}</span>{% endif %}
+        <a class="link-muted" href="{% url 'articles:home' %}">Quitar filtros</a>
+      </div>
+    {% endif %}
+
+    {% include "includes/article_list.html" with empty_message="No hay artículos publicados que coincidan." %}
+  </section>
+
+  <aside class="sidebar">
+    <div class="card sidebar-block">
+      <h3>Categorías</h3>
+      <ul class="category-links">
+        {% for category in categories %}
+          <li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a><span class="count">{{ category.num_published }}</span></li>
+        {% empty %}
+          <li class="muted">Sin categorías todavía.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% if popular_tags %}
+      <div class="card sidebar-block">
+        <h3>Etiquetas</h3>
+        <ul class="tag-list">
+          {% for tag in popular_tags %}<li><a class="tag" href="{% url 'articles:home' %}?tag={{ tag.slug }}">#{{ tag.name }}</a></li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% if not user.is_authenticated %}
+      <div class="card sidebar-block sidebar-cta">
+        <h3>¿Escribes?</h3>
+        <p class="muted">Crea una cuenta, redacta tu artículo y envíalo a revisión.</p>
+        <a class="btn btn-primary btn-block" href="{% url 'accounts:register' %}">Empezar a escribir</a>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

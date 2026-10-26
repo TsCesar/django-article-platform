@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} (ficha){% endblock %}
+{% block content %}
+<div class="private-banner card">
+  <div>
+    <p class="eyebrow">Ficha editorial privada</p>
+    <p class="private-status">Estado: {% include "includes/status_badge.html" %}</p>
+    {% if article.status == "DRAFT" %}
+      <p class="muted">Borrador. Solo tú puedes verlo. Cuando esté listo, envíalo a revisión.</p>
+    {% elif article.status == "PENDING_REVIEW" %}
+      <p class="muted">Pendiente de revisión desde el {{ article.submitted_at|date:"j M Y, H:i" }}. No se puede editar mientras un editor lo revisa.</p>
+    {% elif article.status == "REJECTED" %}
+      <p class="muted">Rechazado. Revisa el motivo, edítalo y vuelve a enviarlo.</p>
+    {% else %}
+      <p class="muted">Publicado el {{ article.published_at|date:"j M Y, H:i" }}. Los artículos publicados no se editan directamente.</p>
+    {% endif %}
+  </div>
+  <div class="button-row">
+    {% if is_owner and article.is_editable %}
+      <a class="btn btn-ghost" href="{% url 'articles:article_update' article.slug %}">Editar</a>
+      <form method="post" action="{% url 'articles:article_submit' article.slug %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">{% if article.status == "REJECTED" %}Reenviar a revisión{% else %}Enviar a revisión{% endif %}</button>
+      </form>
+      <a class="btn btn-danger" href="{% url 'articles:article_delete' article.slug %}">Eliminar</a>
+    {% endif %}
+    {% if article.is_published %}
+      <a class="btn btn-primary" href="{{ article.get_absolute_url }}">Ver publicado</a>
+    {% endif %}
+    {% if user_is_editor and not is_owner and article.status == "PENDING_REVIEW" %}
+      <a class="btn btn-primary" href="{% url 'articles:editor_review' article.slug %}">Revisar</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if reviews %}
+  <section class="review-history card">
+    <h2>Historial de revisiones</h2>
+    <ol class="review-list">
+      {% for review in reviews %}
+        <li class="review review-{{ review.decision|lower }}">
+          <div class="review-head">
+            <span class="badge badge-{% if review.decision == 'APPROVED' %}published{% else %}rejected{% endif %}">{{ review.get_decision_display }}</span>
+            <span class="muted">por {{ review.reviewer.username|default:"editor eliminado" }} · {{ review.created_at|date:"j M Y, H:i" }}</span>
+          </div>
+          {% if review.comment %}<p class="review-comment">{{ review.comment|linebreaksbr }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% endif %}
+
+<article class="article">
+  {% include "includes/article_header.html" %}
+  <div class="article-body prose">
+    {% if article.content %}{{ article.content|linebreaks }}{% else %}<p class="muted">Sin contenido todavía.</p>{% endif %}
+  </div>
+</article>
+{% endblock %}

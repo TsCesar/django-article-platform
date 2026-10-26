@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Categoría</p>
+  <h1>{{ category.name }}</h1>
+  {% if category.description %}<p class="muted">{{ category.description }}</p>{% endif %}
+  <p class="muted">{{ page_obj.paginator.count }} artículo{{ page_obj.paginator.count|pluralize }} publicado{{ page_obj.paginator.count|pluralize }}</p>
+</section>
+{% include "includes/article_list.html" with empty_message="Aún no hay artículos publicados en esta categoría." %}
+{% endblock %}

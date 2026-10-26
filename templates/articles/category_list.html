@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Categorías{% endblock %}
+{% block content %}
+<section class="page-header">
+  <p class="eyebrow">Explorar</p>
+  <h1>Categorías</h1>
+</section>
+<div class="category-grid">
+  {% for category in categories %}
+    <a class="card category-card" href="{{ category.get_absolute_url }}">
+      <h2>{{ category.name }}</h2>
+      {% if category.description %}<p class="muted">{{ category.description }}</p>{% endif %}
+      <span class="count">{{ category.num_published }} artículo{{ category.num_published|pluralize }}</span>
+    </a>
+  {% empty %}
+    <div class="empty-state"><p>Todavía no hay categorías.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

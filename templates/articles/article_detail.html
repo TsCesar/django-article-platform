@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ article.title }}{% endblock %}
+{% block content %}
+<article class="article">
+  {% include "includes/article_header.html" %}
+
+  <div class="article-body prose">
+    {{ article.content|linebreaks }}
+  </div>
+
+  <div class="article-actions">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'articles:like_toggle' article.slug %}" data-like-form>
+        {% csrf_token %}
+        <button type="submit" class="like-button{% if user_liked %} is-liked{% endif %}" aria-pressed="{% if user_liked %}true{% else %}false{% endif %}">
+          <span class="like-icon" data-like-icon>{% if user_liked %}&#9829;{% else %}&#9825;{% endif %}</span>
+          <span data-like-count>{{ like_count }}</span>
+          <span class="visually-hidden">Me gusta</span>
+        </button>
+      </form>
+    {% else %}
+      <a class="like-button" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" title="Inicia sesión para dar Me gusta">
+        <span class="like-icon">&#9825;</span> <span>{{ like_count }}</span>
+      </a>
+    {% endif %}
+    {% if user == article.author or user_is_editor %}
+      <a class="btn btn-ghost btn-sm" href="{{ article.get_private_url }}">Ver ficha editorial</a>
+    {% endif %}
+  </div>
+</article>
+
+<section class="comments" id="comments">
+  <h2>Comentarios <span class="count">{{ comments|length }}</span></h2>
+
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'articles:comment_create' article.slug %}" class="comment-form card">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=comment_form %}
+      <button type="submit" class="btn btn-primary">Publicar comentario</button>
+    </form>
+  {% else %}
+    <p class="muted"><a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Inicia sesión</a> para comentar.</p>
+  {% endif %}
+
+  <ol class="comment-list">
+    {% for comment in comments %}
+      <li class="comment" id="comment-{{ comment.pk }}">
+        <div class="comment-head">
+          {% include "includes/author_chip.html" with author=comment.author %}
+          <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"j M Y, H:i" }}</time>
+        </div>
+        <div class="comment-body">{{ comment.content|linebreaksbr }}</div>
+        {% if comment.author == user %}
+          <form method="post" action="{% url 'articles:comment_delete' comment.pk %}" class="comment-delete" data-confirm="¿Eliminar este comentario?">
+            {% csrf_token %}
+            <button type="submit" class="link-danger">Eliminar</button>
+          </form>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="muted">Todavía no hay comentarios. ¡Sé el primero!</li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/likes.js' %}" defer></script>{% endblock %}

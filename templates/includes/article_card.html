@@ -1,0 +1,18 @@
+<article class="card article-card">
+  <div class="card-meta">
+    {% if article.category %}
+      <a class="card-category" href="{{ article.category.get_absolute_url }}">{{ article.category.name }}</a>
+    {% endif %}
+    <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"j M Y" }}</time>
+  </div>
+  <h2 class="card-title"><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h2>
+  <p class="card-excerpt">{{ article.summary }}</p>
+  {% include "includes/tag_list.html" %}
+  <footer class="card-footer">
+    {% include "includes/author_chip.html" with author=article.author %}
+    <span class="card-stats">
+      <span title="Me gusta" class="{% if article.pk in liked_ids %}liked{% endif %}">{% if article.pk in liked_ids %}&#9829;{% else %}&#9825;{% endif %} {{ article.num_likes }}</span>
+      <span title="Comentarios">&#9998; {{ article.num_comments }}</span>
+    </span>
+  </footer>
+</article>

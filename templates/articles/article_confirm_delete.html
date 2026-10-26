@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Eliminar artículo{% endblock %}
+{% block content %}
+<section class="card confirm-card">
+  <h1>¿Eliminar “{{ article.title }}”?</h1>
+  <p class="muted">Esta acción no se puede deshacer. Se eliminará también su historial de revisiones.</p>
+  <form method="post" class="button-row">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+    <a class="btn btn-ghost" href="{{ article.get_private_url }}">Cancelar</a>
+  </form>
+</section>
+{% endblock %}

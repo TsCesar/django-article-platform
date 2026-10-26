@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Página no encontrada{% endblock %}
+{% block content %}
+<section class="error-page">
+  <p class="error-code">404</p>
+  <h1>Página no encontrada</h1>
+  <p class="muted">El contenido que buscas no existe o no está disponible públicamente.</p>
+  <a class="btn btn-primary" href="{% url 'articles:home' %}">Volver al inicio</a>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Revisar: {{ article.title }}{% endblock %}
+{% block content %}
+<p><a class="link-muted" href="{% url 'articles:editor_dashboard' %}">&larr; Volver a la cola de revisión</a></p>
+
+<div class="review-layout">
+  <article class="article card">
+    {% include "includes/article_header.html" %}
+    <div class="article-body prose">{{ article.content|linebreaks }}</div>
+  </article>
+
+  <aside class="review-panel">
+    <form method="post" class="card" id="review-form" novalidate>
+      {% csrf_token %}
+      <h2>Decisión editorial</h2>
+      <p class="muted">Enviado por {{ article.author.username }} el {{ article.submitted_at|date:"j M Y, H:i" }}.</p>
+      {% include "includes/form_fields.html" %}
+      <button type="submit" class="btn btn-primary btn-block">Guardar decisión</button>
+    </form>
+
+    {% if previous_reviews %}
+      <div class="card review-history">
+        <h3>Revisiones anteriores</h3>
+        <ol class="review-list">
+          {% for review in previous_reviews %}
+            <li class="review">
+              <div class="review-head">
+                <span class="badge badge-{% if review.decision == 'APPROVED' %}published{% else %}rejected{% endif %}">{{ review.get_decision_display }}</span>
+                <span class="muted">{{ review.created_at|date:"j M Y" }}</span>
+              </div>
+              {% if review.comment %}<p class="review-comment">{{ review.comment }}</p>{% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
