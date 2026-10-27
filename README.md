@@ -6,7 +6,7 @@ Proyecto académico construido con Django, plantillas del servidor, CSS propio y
 
 ## Demo pública
 
-Demo pública: [pendiente de URL]
+[Ver ArticleHub en funcionamiento](https://articlehub-m7hk.onrender.com)
 
 ## Características
 
